@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habi — Avalúo gratis de tu inmueble</title>
+  <meta name="description" content="Conoce el valor real de tu casa o apartamento en minutos. Avalúo gratuito, en línea, con datos del mercado colombiano.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__inner">
+      <a href="#" class="header__logo">
+        <img src="logo-habi.png" alt="Habi" class="header__logo-img">
+      </a>
+      <nav class="header__nav">
+        <span class="header__tag">Avalúo gratuito en línea</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero__inner">
+      <div class="hero__content">
+        <h1 class="hero__title">Conoce el valor de tu inmueble <span>gratis y en minutos</span></h1>
+        <p class="hero__sub">Nuestro algoritmo analiza datos del mercado colombiano para darte un avalúo preciso. Sin costo, sin visitas, sin compromiso.</p>
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <strong>+500K</strong>
+            <span>Avalúos realizados</span>
+          </div>
+          <div class="hero__stat">
+            <strong>28</strong>
+            <span>Ciudades</span>
+          </div>
+          <div class="hero__stat">
+            <strong>5 min</strong>
+            <span>Tiempo promedio</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero__visual">
+        <div class="hero__card">
+          <div class="hero__card-label">Valor estimado</div>
+          <div class="hero__card-value">$452.460.000</div>
+          <div class="hero__card-sub">Carrera 10 #73-20 · Bogotá · 80 m²</div>
+          <div class="hero__card-bar">
+            <div class="hero__card-bar-fill"></div>
+          </div>
+          <div class="hero__card-range">
+            <span>$339M</span><span>$566M</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN: FORM -->
+  <main class="main" id="mainForm">
+    <div class="main__inner">
+
+      <!-- LEFT: Form -->
+      <div class="form-col">
+        <!-- Progress bar -->
+        <div class="progress">
+          <div class="progress__top">
+            <span class="progress__label" id="progressLabel">Precisión del avalúo</span>
+            <span class="progress__pct" id="progressPct">0%</span>
+          </div>
+          <div class="progress__bar">
+            <div class="progress__fill" id="progressFill"></div>
+          </div>
+          <p class="progress__hint" id="progressHint">Ingresa la ubicación de tu inmueble para comenzar</p>
+        </div>
+
+        <!-- Step indicators -->
+        <div class="steps-nav" id="stepsNav">
+          <button class="steps-nav__dot active" data-step="1"><span>1</span> Ubicación</button>
+          <button class="steps-nav__dot" data-step="2"><span>2</span> Inmueble</button>
+          <button class="steps-nav__dot" data-step="3"><span>3</span> Características</button>
+          <button class="steps-nav__dot" data-step="4"><span>4</span> Detalles</button>
+          <button class="steps-nav__dot" data-step="5"><span>5</span> Tus datos</button>
+        </div>
+
+        <!-- Steps -->
+        <div class="steps" id="stepsContainer">
+
+          <!-- STEP 1 -->
+          <div class="step active" data-step="1">
+            <div class="step__header">
+              <h2 class="step__title">¿Dónde está tu inmueble?</h2>
+              <p class="step__sub">Con la ubicación identificamos la zona y el entorno de tu propiedad.</p>
+            </div>
+            <div class="step__fields">
+              <div class="field">
+                <label class="field__label">Ciudad</label>
+                <div class="custom-select" id="citySelect">
+                  <button class="custom-select__trigger" id="cityTrigger" type="button">
+                    <span id="cityLabel">Selecciona tu ciudad</span>
+                    <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="#6E6B75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <div class="custom-select__dropdown" id="cityDropdown"></div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label" for="address">Dirección</label>
+                <input class="field__input" type="text" id="address" placeholder="Ej: Carrera 10 #73-20" required>
+                <div class="field__suggestions" id="addressSuggestions"></div>
+              </div>
+            </div>
+            <button class="btn btn--primary btn--full btn--next" id="btn1" disabled>Continuar</button>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="step" data-step="2">
+            <div class="step__header">
+              <h2 class="step__title">¿Qué tipo de inmueble es?</h2>
+              <p class="step__sub">Si encontramos datos catastrales, te ahorramos tiempo completando información.</p>
+            </div>
+            <div class="step__fields">
+              <div class="field">
+                <label class="field__label">Tipo de inmueble</label>
+                <div class="toggle-group toggle-group--grid" id="propertyType">
+                  <button class="toggle active" data-value="1">🏢 Apartamento</button>
+                  <button class="toggle" data-value="2">🏠 Casa</button>
+                  <button class="toggle" data-value="3">🏢 Apartamento en conjunto</button>
+                  <button class="toggle" data-value="4">🏘️ Casa en conjunto</button>
+                </div>
+              </div>
+              <div class="field catastral-fields hidden" id="catastralFields">
+                <label class="field__label" for="unit">Tu apartamento</label>
+                <select class="field__select" id="unit">
+                  <option value="" disabled selected>Selecciona tu unidad</option>
+                </select>
+                <p class="field__helper" id="unitHelper"></p>
+              </div>
+            </div>
+            <div class="step__nav">
+              <button class="btn btn--ghost btn--back">Atrás</button>
+              <button class="btn btn--primary btn--next" id="btn2">Continuar</button>
+            </div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="step" data-step="3">
+            <div class="step__header">
+              <h2 class="step__title">Cuéntanos más de tu inmueble</h2>
+              <p class="step__sub">Con estas características ya podemos estimar un rango de valor.</p>
+            </div>
+            <div class="step__fields">
+              <div class="fields-grid">
+                <div class="field">
+                  <label class="field__label" for="area">Área construida (m²)</label>
+                  <input class="field__input" type="number" id="area" min="10" max="1000" placeholder="80" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="rooms">Habitaciones</label>
+                  <select class="field__select" id="rooms">
+                    <option value="1">1</option><option value="2">2</option>
+                    <option value="3" selected>3</option><option value="4">4</option>
+                    <option value="5">5</option><option value="6">6+</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="bathrooms">Baños</label>
+                  <select class="field__select" id="bathrooms">
+                    <option value="1">1</option><option value="2" selected>2</option>
+                    <option value="3">3</option><option value="4">4</option><option value="5">5+</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="garages">Garajes</label>
+                  <select class="field__select" id="garages">
+                    <option value="0">Sin garaje</option><option value="1" selected>1</option>
+                    <option value="2">2</option><option value="3">3+</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="age">Antigüedad (años)</label>
+                  <input class="field__input" type="number" id="age" min="0" max="100" placeholder="12" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="stratum">Estrato</label>
+                  <select class="field__select" id="stratum">
+                    <option value="1">1</option><option value="2">2</option>
+                    <option value="3">3</option><option value="4" selected>4</option>
+                    <option value="5">5</option><option value="6">6</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="step__nav">
+              <button class="btn btn--ghost btn--back">Atrás</button>
+              <button class="btn btn--primary btn--next" id="btn3">Continuar</button>
+            </div>
+          </div>
+
+          <!-- STEP 4 -->
+          <div class="step" data-step="4">
+            <div class="step__header">
+              <h2 class="step__title">Detalles adicionales</h2>
+              <p class="step__sub">Estos detalles nos ayudan a afinar la precisión del avalúo.</p>
+            </div>
+            <div class="step__fields">
+              <div class="fields-grid fields-grid--toggles">
+                <div class="field field--toggle">
+                  <label class="field__label">Ascensor</label>
+                  <div class="toggle-yn" data-field="elevator"><button class="active" data-value="1">Sí</button><button data-value="0">No</button></div>
+                </div>
+                <div class="field field--toggle">
+                  <label class="field__label">Balcón</label>
+                  <div class="toggle-yn" data-field="balcony"><button data-value="1">Sí</button><button class="active" data-value="0">No</button></div>
+                </div>
+                <div class="field field--toggle">
+                  <label class="field__label">Terraza</label>
+                  <div class="toggle-yn" data-field="terrace"><button data-value="1">Sí</button><button class="active" data-value="0">No</button></div>
+                </div>
+                <div class="field field--toggle">
+                  <label class="field__label">Depósito</label>
+                  <div class="toggle-yn" data-field="storage"><button data-value="1">Sí</button><button class="active" data-value="0">No</button></div>
+                </div>
+                <div class="field field--toggle">
+                  <label class="field__label">Portería</label>
+                  <div class="toggle-yn" data-field="doorman"><button data-value="1">Sí</button><button class="active" data-value="0">No</button></div>
+                </div>
+                <div class="field field--toggle">
+                  <label class="field__label">Remodelado</label>
+                  <div class="toggle-yn" data-field="remodeled"><button data-value="1">Sí</button><button class="active" data-value="0">No</button></div>
+                </div>
+              </div>
+              <div class="fields-grid" style="margin-top:16px">
+                <div class="field">
+                  <label class="field__label" for="floor">Piso</label>
+                  <input class="field__input" type="number" id="floor" min="1" max="50" placeholder="3">
+                </div>
+                <div class="field">
+                  <label class="field__label" for="view">Vista</label>
+                  <select class="field__select" id="view">
+                    <option value="Interna" selected>Interna</option>
+                    <option value="Exterior">Exterior</option>
+                    <option value="Panorámica">Panorámica</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="step__nav">
+              <button class="btn btn--ghost btn--back">Atrás</button>
+              <button class="btn btn--primary btn--next" id="btn4">Continuar</button>
+            </div>
+          </div>
+
+          <!-- STEP 5 -->
+          <div class="step" data-step="5">
+            <div class="step__header">
+              <h2 class="step__title">¿A dónde enviamos tu avalúo?</h2>
+              <p class="step__sub">Déjanos tus datos y en segundos tendrás tu reporte completo.</p>
+            </div>
+            <div class="step__fields">
+              <div class="field">
+                <label class="field__label" for="name">Nombre completo</label>
+                <input class="field__input" type="text" id="name" placeholder="Tu nombre" required>
+              </div>
+              <div class="fields-grid">
+                <div class="field">
+                  <label class="field__label" for="email">Correo electrónico</label>
+                  <input class="field__input" type="email" id="email" placeholder="tu@correo.com" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="phone">Teléfono</label>
+                  <input class="field__input" type="tel" id="phone" placeholder="+57 300 123 4567" required>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label">¿Qué te interesa?</label>
+                <div class="intent-grid" id="intentGrid">
+                  <button class="intent-btn active" data-value="vender"><span class="intent-btn__icon">🏠</span><span>Quiero vender</span></button>
+                  <button class="intent-btn" data-value="comprar"><span class="intent-btn__icon">🔑</span><span>Quiero comprar</span></button>
+                  <button class="intent-btn" data-value="agente"><span class="intent-btn__icon">💼</span><span>Soy agente</span></button>
+                  <button class="intent-btn" data-value="curioso"><span class="intent-btn__icon">👀</span><span>Solo curiosidad</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="step__nav">
+              <button class="btn btn--ghost btn--back">Atrás</button>
+              <button class="btn btn--primary btn--submit" id="btnSubmit">Ver mi avalúo</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT: Live panel -->
+      <div class="panel-col" id="panelCol">
+        <div class="panel" id="livePanel">
+          <!-- Empty state -->
+          <div class="panel__empty" id="panelEmpty">
+            <div class="panel__empty-icon">🏡</div>
+            <h3>Tu avalúo en tiempo real</h3>
+            <p>A medida que completes los pasos, aquí verás información valiosa sobre tu inmueble y su entorno.</p>
+          </div>
+          <!-- Value cards will be injected here -->
+          <div class="panel__cards" id="panelCards"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- EXPLAINER -->
+  <section class="explainer" id="explainerSection">
+    <div class="explainer__inner">
+      <div class="explainer__img">
+        <img src="habimetro-explainer.png" alt="Habi - Avalúo en línea" loading="lazy">
+      </div>
+      <div class="explainer__content">
+        <h2 class="explainer__title">Con Habi tendrás el valor preciso del metro cuadrado en Colombia.</h2>
+        <div class="explainer__question">
+          <h3>¿Por qué valorar mi casa con Habi?</h3>
+          <ul>
+            <li>Nuestro calculador de metro cuadrado se basa en datos del DANE y el Ministerio de Vivienda Nacional para calcular el precio del metro cuadrado de una manera más certera.</li>
+            <li>También contamos datos relevantes de tu zona, como el precio de venta promedio de inmuebles similares y tendencias del mercado.</li>
+          </ul>
+        </div>
+        <a href="#mainForm" class="btn btn--primary">Haz clic y conoce el precio</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faqSection">
+    <div class="faq__inner">
+      <h2 class="faq__title">Preguntas frecuentes sobre Habi</h2>
+      <div class="faq__list">
+        <details class="faq__item">
+          <summary>¿Cómo es el cálculo del valor de tu inmueble en línea?</summary>
+          <p>Habi utiliza un método de comparación de características, analizando datos como ubicación, área construida, antigüedad, estrato socioeconómico, número de habitaciones, baños y otros atributos relevantes. Comparamos tu inmueble con propiedades similares actualmente en venta para darte un estimado ajustado al mercado actual.</p>
+        </details>
+        <details class="faq__item">
+          <summary>¿Qué diferencia hay entre Habi y un avalúo comercial certificado?</summary>
+          <p>Habi es un estimado basado en datos del mercado y es completamente gratuito. Un avalúo comercial certificado es realizado por un perito avaluador certificado por la Lonja, incluye visita presencial y tiene validez legal para trámites bancarios y notariales. Habi te da una referencia rápida y confiable del valor de tu inmueble.</p>
+        </details>
+        <details class="faq__item">
+          <summary>¿Qué significa tener el valor comercial de mi inmueble?</summary>
+          <p>El valor comercial es el precio estimado al que podrías vender tu inmueble en el mercado actual. Es diferente del avalúo catastral (usado para impuestos) y del valor de la escritura. Conocer el valor comercial te permite tomar decisiones informadas al momento de vender, comprar o solicitar un crédito hipotecario.</p>
+        </details>
+        <details class="faq__item">
+          <summary>¿Dónde avalúa y compara Habi los inmuebles?</summary>
+          <p>Habi funciona en las principales ciudades de Colombia: Bogotá, Medellín, Cali, Barranquilla, Bucaramanga, Cartagena, Pereira, Armenia y sus áreas metropolitanas. En total cubrimos más de 28 ciudades incluyendo Soacha, Envigado, Bello, Itagüí, Sabaneta, Chía, Cajicá y más.</p>
+        </details>
+        <details class="faq__item">
+          <summary>¿Por qué Habi realiza un estudio sin ningún costo?</summary>
+          <p>En Habi creemos que la información del valor de tu inmueble debe ser accesible para todos. Habi es una herramienta gratuita que busca democratizar el acceso a datos inmobiliarios. Así puedes tomar decisiones informadas sobre tu patrimonio sin tener que pagar por una valoración profesional.</p>
+        </details>
+        <details class="faq__item">
+          <summary>¿Cada cuánto se actualizan los datos del avalúo?</summary>
+          <p>Los datos del mercado se actualizan constantemente. La valoración digital tiene una vigencia estimada de 3 a 6 meses, ya que las condiciones del mercado, el desarrollo urbano y factores económicos pueden cambiar. Te recomendamos realizar un nuevo avalúo si han pasado más de 3 meses.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section class="loading-section hidden" id="loadingSection">
+    <div class="loading">
+      <div class="loading__spinner"></div>
+      <h2 class="loading__title">Calculando tu avalúo</h2>
+      <p class="loading__sub" id="loadingText">Analizando ubicación y zona...</p>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results hidden" id="resultsSection">
+    <div class="results__inner">
+
+      <!-- Results hero -->
+      <div class="results__hero">
+        <img src="logo-habi.png" alt="Habi" class="results__logo">
+        <p class="results__label">Valor estimado de tu inmueble</p>
+        <h1 class="results__value" id="resultValue">$0</h1>
+        <div class="results__range">
+          <div class="range-bar" id="rangeBar">
+            <div class="range-bar__fill"></div>
+            <div class="range-bar__marker" id="rangeMarker"></div>
+          </div>
+          <div class="range-bar__labels">
+            <span id="rangeMin">$0</span>
+            <span id="rangeMax">$0</span>
+          </div>
+        </div>
+        <div class="results__meta">
+          <div class="results__meta-item">
+            <span class="results__meta-label">Precio por m²</span>
+            <span class="results__meta-value" id="resultM2">$0</span>
+          </div>
+          <div class="results__meta-item">
+            <span class="results__meta-label">Confianza</span>
+            <span class="results__meta-value" id="resultConfidence">—</span>
+          </div>
+          <div class="results__meta-item">
+            <span class="results__meta-label">Arriendo estimado</span>
+            <span class="results__meta-value" id="resultRent">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Eligibility cards -->
+      <div class="eligibility" id="eligibilityCards"></div>
+
+      <!-- 2-col results grid -->
+      <div class="results__grid">
+        <!-- Property summary -->
+        <div class="results__card">
+          <h3 class="results__card-title">Tu inmueble</h3>
+          <div class="property-tags" id="propertyTags"></div>
+        </div>
+
+        <!-- Price history -->
+        <div class="results__card">
+          <h3 class="results__card-title">Histórico de precios</h3>
+          <div class="chart-container"><canvas id="priceChart"></canvas></div>
+        </div>
+
+        <!-- Costs -->
+        <div class="results__card">
+          <h3 class="results__card-title">Costos de venta estimados</h3>
+          <div class="costs-table" id="costsTable"></div>
+          <div class="costs-net" id="costsNet"></div>
+        </div>
+
+        <!-- Map & POIs -->
+        <div class="results__card results__card--wide">
+          <h3 class="results__card-title">Tu entorno</h3>
+          <div class="results__map-row">
+            <div class="map-container" id="mapContainer"></div>
+            <div class="pois-list" id="poisGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="results__cta">
+        <h3>¿Listo para dar el siguiente paso?</h3>
+        <p>Nuestro equipo puede ayudarte a vender rápido y sin complicaciones. Tú decides cómo.</p>
+        <div class="results__cta-btns">
+          <a href="#" class="btn btn--primary btn--lg" id="ctaMain">Hablar con un asesor</a>
+          <button class="btn btn--outline btn--lg" id="btnRestart">Avaluar otro inmueble</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <img src="logo-habi.png" alt="Habi" class="footer__logo">
+      <p>Los valores son estimados con base en datos del mercado y no constituyen un avalúo comercial certificado.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
