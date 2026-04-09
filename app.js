@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindToggles();
   bindIntentButtons();
   bindFormInputs();
-  bindAddressAutocomplete();
+  bindAddressFields();
   updateProgress();
 });
 
@@ -116,133 +116,37 @@ async function loadCities() {
   });
 }
 
-// ── Address Autocomplete ──
-let geoDebounce;
-let addressConfirmed = false;
+// ── Structured Address ──
+function bindAddressFields() {
+  const fields = ['tipoVia', 'num1', 'num2', 'num3'];
+  const preview = document.getElementById('addressPreview');
 
-function bindAddressAutocomplete() {
-  const input = document.getElementById('address');
-  const sugBox = document.getElementById('addressSuggestions');
-  const matchHelper = document.getElementById('addressMatch');
+  fields.forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      updateAddress();
+      validateStep1();
+    });
+    document.getElementById(id).addEventListener('change', () => {
+      updateAddress();
+      validateStep1();
+    });
+  });
 
-  input.addEventListener('input', () => {
-    formData.address = input.value;
-    addressConfirmed = false;
-    api.georef = null;
-    matchHelper.classList.add('hidden');
-    validateStep1();
+  function updateAddress() {
+    const via = document.getElementById('tipoVia').value;
+    const n1 = document.getElementById('num1').value.trim();
+    const n2 = document.getElementById('num2').value.trim();
+    const n3 = document.getElementById('num3').value.trim();
 
-    clearTimeout(geoDebounce);
-    if (input.value.length >= 8 && formData.city) {
-      geoDebounce = setTimeout(() => searchAddress(input.value), 300);
+    if (via && n1 && n2 && n3) {
+      formData.address = `${via} ${n1} # ${n2} - ${n3}`;
+      preview.textContent = `📍 ${formData.address}`;
+      preview.classList.remove('hidden');
     } else {
-      sugBox.classList.remove('open');
+      formData.address = '';
+      preview.classList.add('hidden');
     }
-  });
-
-  input.addEventListener('focus', () => {
-    // Re-show suggestions if there's text and no confirmed address
-    if (input.value.length >= 8 && formData.city && !addressConfirmed) {
-      searchAddress(input.value);
-    }
-  });
-
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.field')) sugBox.classList.remove('open');
-  });
-}
-
-async function searchAddress(query) {
-  const sugBox = document.getElementById('addressSuggestions');
-
-  // Show searching state
-  sugBox.innerHTML = '<div class="field__sug-status">Buscando dirección...</div>';
-  sugBox.classList.add('open');
-
-  try {
-    const raw = await HabiAPI.getGeoref(query, formData.city, formData.propertyType);
-    const georef = raw.georeferencing || raw;
-
-    let html = '';
-
-    // Main result (exact match with lot_id)
-    if (georef.lot_id && georef.address) {
-      const project = georef.project ? ` — ${georef.project}` : '';
-      html += `<button class="field__sug-item field__sug-item--match" data-address="${georef.address}" data-main="true">
-        <span class="field__sug-icon">📍</span>
-        <span><strong>${georef.address}</strong>${project}</span>
-      </button>`;
-    }
-
-    // Suggestions
-    if (georef.suggested_addresses && georef.suggested_addresses.length > 0) {
-      georef.suggested_addresses.forEach(s => {
-        html += `<button class="field__sug-item" data-address="${s.direccion}">
-          <span class="field__sug-icon">📍</span>
-          <span>${s.direccion} <span style="color:#949494">— ${s.label || s.ciudad || ''}</span></span>
-        </button>`;
-      });
-    }
-
-    if (html) {
-      sugBox.innerHTML = html;
-      sugBox.classList.add('open');
-
-      // Store georef if we got a direct match
-      if (georef.lot_id) api.georef = georef;
-
-      // Bind selection
-      sugBox.querySelectorAll('.field__sug-item').forEach(btn => {
-        btn.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          selectSuggestion(btn, georef);
-        });
-      });
-    } else {
-      sugBox.innerHTML = '<div class="field__sug-status">Al parecer no encontramos esta dirección 🧐</div>';
-    }
-  } catch (e) {
-    console.error('Georef search failed:', e);
-    sugBox.innerHTML = '<div class="field__sug-status">Error al buscar dirección</div>';
   }
-}
-
-async function selectSuggestion(btn, originalGeoref) {
-  const address = btn.dataset.address;
-  const input = document.getElementById('address');
-  const sugBox = document.getElementById('addressSuggestions');
-  const matchHelper = document.getElementById('addressMatch');
-
-  input.value = address;
-  formData.address = address;
-  sugBox.classList.remove('open');
-
-  // If it was the main match, use that georef directly
-  if (btn.dataset.main === 'true' && originalGeoref && originalGeoref.lot_id) {
-    api.georef = originalGeoref;
-    addressConfirmed = true;
-    const project = originalGeoref.project || '';
-    matchHelper.textContent = project ? `✓ ${project} — Dirección identificada` : '✓ Dirección identificada';
-    matchHelper.classList.remove('hidden');
-    validateStep1();
-    return;
-  }
-
-  // Otherwise re-fetch for the selected address
-  matchHelper.textContent = 'Verificando dirección...';
-  matchHelper.classList.remove('hidden');
-  try {
-    const raw = await HabiAPI.getGeoref(address, formData.city, formData.propertyType);
-    api.georef = raw.georeferencing || raw;
-    addressConfirmed = true;
-    const project = api.georef.project || '';
-    matchHelper.textContent = project ? `✓ ${project} — Dirección identificada` : '✓ Dirección identificada';
-  } catch (e) {
-    console.error('Georef select failed:', e);
-    matchHelper.textContent = 'No pudimos verificar esta dirección';
-  }
-  validateStep1();
 }
 
 // ── Navigation ──
@@ -305,6 +209,16 @@ async function onStepComplete(step) {
 
 // ── Step 1: Location complete ──
 async function onLocationComplete(panel) {
+  // Georef the structured address
+  if (formData.address && formData.city) {
+    try {
+      const raw = await HabiAPI.getGeoref(formData.address, formData.city, formData.propertyType);
+      api.georef = raw.georeferencing || raw;
+    } catch (e) {
+      console.error('Georef failed:', e);
+    }
+  }
+
   // Show location card with georef data
   addLocationCard(panel);
 
@@ -599,7 +513,19 @@ function bindFormInputs() {
 }
 
 function validateStep1() {
-  document.getElementById('btn1').disabled = !(formData.city && formData.address.length >= 5);
+  const via = document.getElementById('tipoVia').value;
+  const n1 = document.getElementById('num1').value.trim();
+  const n2 = document.getElementById('num2').value.trim();
+  const n3 = document.getElementById('num3').value.trim();
+  const numRegex = /^\d{1,3}([a-zA-Z\s]*)?$/;
+
+  const valid = formData.city
+    && via
+    && n1 && numRegex.test(n1)
+    && n2 && numRegex.test(n2)
+    && n3 && numRegex.test(n3);
+
+  document.getElementById('btn1').disabled = !valid;
 }
 
 // ── Submit → POST habimetro + GET habimetro ──

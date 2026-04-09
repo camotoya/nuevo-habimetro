@@ -83,7 +83,7 @@
         <!-- Step indicators -->
         <div class="steps-nav" id="stepsNav">
           <button class="steps-nav__dot active" data-step="1"><span>1</span> Ubicación</button>
-          <button class="steps-nav__dot" data-step="2"><span>2</span> Inmueble</button>
+          <button class="steps-nav__dot" data-step="2"><span>2</span> Catastral</button>
           <button class="steps-nav__dot" data-step="3"><span>3</span> Características</button>
           <button class="steps-nav__dot" data-step="4"><span>4</span> Detalles</button>
           <button class="steps-nav__dot" data-step="5"><span>5</span> Tus datos</button>
@@ -95,10 +95,21 @@
           <!-- STEP 1 -->
           <div class="step active" data-step="1">
             <div class="step__header">
-              <h2 class="step__title">¿Dónde está tu inmueble?</h2>
-              <p class="step__sub">Con la ubicación identificamos la zona y el entorno de tu propiedad.</p>
+              <h2 class="step__title">Cuéntanos sobre tu inmueble</h2>
+              <p class="step__sub">Con estos datos identificamos tu propiedad y su entorno.</p>
             </div>
             <div class="step__fields">
+              <!-- Tipo de inmueble -->
+              <div class="field">
+                <label class="field__label">Tipo de inmueble</label>
+                <div class="toggle-group toggle-group--grid" id="propertyType">
+                  <button class="toggle active" data-value="1">🏢 Apartamento</button>
+                  <button class="toggle" data-value="2">🏠 Casa</button>
+                  <button class="toggle" data-value="3">🏢 Apto en conjunto</button>
+                  <button class="toggle" data-value="4">🏘️ Casa en conjunto</button>
+                </div>
+              </div>
+              <!-- Ciudad -->
               <div class="field">
                 <label class="field__label">Ciudad</label>
                 <div class="custom-select" id="citySelect">
@@ -106,11 +117,26 @@
                   <div class="custom-select__dropdown" id="cityDropdown"></div>
                 </div>
               </div>
+              <!-- Dirección estructurada -->
               <div class="field">
-                <label class="field__label" for="address">Ingresa tu dirección</label>
-                <input class="field__input" type="text" id="address" placeholder="Ej: Calle 57b Sur #40-34" autocomplete="off" required>
-                <div class="field__suggestions" id="addressSuggestions"></div>
-                <p class="field__helper hidden" id="addressMatch"></p>
+                <label class="field__label">Dirección</label>
+                <div class="address-structured">
+                  <select class="field__select address-structured__via" id="tipoVia">
+                    <option value="" disabled selected>Tipo de vía</option>
+                    <option value="Calle">Calle</option>
+                    <option value="Carrera">Carrera</option>
+                    <option value="Avenida">Avenida</option>
+                    <option value="Diagonal">Diagonal</option>
+                    <option value="Transversal">Transversal</option>
+                    <option value="Circular">Circular</option>
+                  </select>
+                  <input class="field__input address-structured__num" type="text" id="num1" placeholder="Ej: 127 c bis" maxlength="15">
+                  <span class="address-structured__sep">#</span>
+                  <input class="field__input address-structured__num" type="text" id="num2" placeholder="Ej: 78" maxlength="15">
+                  <span class="address-structured__sep">-</span>
+                  <input class="field__input address-structured__num address-structured__num--short" type="text" id="num3" placeholder="Ej: 97" maxlength="10">
+                </div>
+                <p class="field__helper hidden" id="addressPreview"></p>
               </div>
             </div>
             <button class="btn btn--primary btn--full btn--next" id="btn1" disabled>Continuar</button>
@@ -119,21 +145,12 @@
           <!-- STEP 2 -->
           <div class="step" data-step="2">
             <div class="step__header">
-              <h2 class="step__title">¿Qué tipo de inmueble es?</h2>
+              <h2 class="step__title">Datos catastrales</h2>
               <p class="step__sub">Si encontramos datos catastrales, te ahorramos tiempo completando información.</p>
             </div>
             <div class="step__fields">
-              <div class="field">
-                <label class="field__label">Tipo de inmueble</label>
-                <div class="toggle-group toggle-group--grid" id="propertyType">
-                  <button class="toggle active" data-value="1">🏢 Apartamento</button>
-                  <button class="toggle" data-value="2">🏠 Casa</button>
-                  <button class="toggle" data-value="3">🏢 Apartamento en conjunto</button>
-                  <button class="toggle" data-value="4">🏘️ Casa en conjunto</button>
-                </div>
-              </div>
-              <div class="field catastral-fields hidden" id="catastralFields">
-                <label class="field__label" for="unit">Tu apartamento</label>
+              <div class="field catastral-fields" id="catastralFields">
+                <label class="field__label" for="unit">Tu unidad</label>
                 <select class="field__select" id="unit">
                   <option value="" disabled selected>Selecciona tu unidad</option>
                 </select>

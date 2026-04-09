@@ -477,6 +477,36 @@ input, select, textarea { font-family: inherit; }
 .custom-select__option.active { background: var(--purple-light); color: var(--purple); font-weight: 600; }
 .custom-select__empty { padding: 10px 14px; font-size: 13px; color: var(--gray-400); }
 
+/* ── Structured address ── */
+.address-structured {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.address-structured__via {
+  flex: 0 0 140px;
+  min-width: 0;
+}
+.address-structured__num {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.address-structured__num--short {
+  flex: 0.7;
+}
+.address-structured__sep {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .address-structured { flex-wrap: wrap; }
+  .address-structured__via { flex: 1 1 100%; }
+  .address-structured__num { flex: 1 1 0; min-width: 60px; }
+}
+
 .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
 .fields-grid--toggles { grid-template-columns: 1fr 1fr 1fr; }
 
