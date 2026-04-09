@@ -428,30 +428,9 @@ input, select, textarea { font-family: inherit; }
 }
 .field__suggestions button:hover { background: var(--purple-light); }
 
-/* ── Custom select ── */
+/* ── Custom select (searchable) ── */
 .custom-select { position: relative; }
-.custom-select__trigger {
-  width: 100%;
-  padding: 12px 38px 12px 14px;
-  border: 2px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  color: var(--dark);
-  background: var(--white);
-  text-align: left;
-  transition: border-color var(--transition);
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.custom-select__trigger:focus,
-.custom-select.open .custom-select__trigger {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(124, 1, 255, 0.08);
-}
-.custom-select__trigger span { color: var(--gray-400); }
-.custom-select__trigger span.selected { color: var(--dark); }
+.custom-select__input { cursor: text; }
 .custom-select__dropdown {
   display: none;
   position: absolute;
@@ -480,6 +459,7 @@ input, select, textarea { font-family: inherit; }
 }
 .custom-select__option:hover { background: var(--purple-light); }
 .custom-select__option.active { background: var(--purple-light); color: var(--purple); font-weight: 600; }
+.custom-select__empty { padding: 10px 14px; font-size: 13px; color: var(--gray-400); }
 
 .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
 .fields-grid--toggles { grid-template-columns: 1fr 1fr 1fr; }

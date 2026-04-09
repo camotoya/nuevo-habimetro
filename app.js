@@ -46,9 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Cities (async) ──
 async function loadCities() {
   const container = document.getElementById('citySelect');
-  const trigger = document.getElementById('cityTrigger');
+  const input = document.getElementById('cityInput');
   const dropdown = document.getElementById('cityDropdown');
-  const label = document.getElementById('cityLabel');
 
   let cities = [];
   try {
@@ -62,15 +61,41 @@ async function loadCities() {
   }
   api.cities = cities;
 
-  dropdown.innerHTML = cities.map(c => {
-    const value = c.name || c.value || '';
-    const cityId = c.id || c.ciudad_id || '';
-    const text = c.label || c.name || '';
-    return `<button class="custom-select__option" type="button" data-value="${value}" data-city-id="${cityId}">${text}</button>`;
-  }).join('');
+  function renderOptions(filter) {
+    const q = (filter || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const filtered = q ? cities.filter(c => {
+      const label = (c.label || c.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return label.includes(q);
+    }) : cities;
 
-  // Toggle dropdown
-  trigger.addEventListener('click', () => container.classList.toggle('open'));
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="custom-select__empty">No se encontraron ciudades</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(c => {
+        const value = c.name || c.value || '';
+        const cityId = c.id || c.ciudad_id || '';
+        const text = c.label || c.name || '';
+        const isActive = value === formData.city ? ' active' : '';
+        return `<button class="custom-select__option${isActive}" type="button" data-value="${value}" data-city-id="${cityId}">${text}</button>`;
+      }).join('');
+    }
+  }
+
+  // Show all options on focus
+  input.addEventListener('focus', () => {
+    renderOptions(input.value);
+    container.classList.add('open');
+  });
+
+  // Filter as user types
+  input.addEventListener('input', () => {
+    formData.city = '';
+    formData.cityName = '';
+    formData.cityId = '';
+    renderOptions(input.value);
+    container.classList.add('open');
+    validateStep1();
+  });
 
   // Select option
   dropdown.addEventListener('mousedown', (e) => {
@@ -80,10 +105,7 @@ async function loadCities() {
     formData.city = opt.dataset.value;
     formData.cityName = opt.textContent;
     formData.cityId = opt.dataset.cityId || '';
-    label.textContent = opt.textContent;
-    label.classList.add('selected');
-    dropdown.querySelectorAll('.custom-select__option').forEach(o => o.classList.remove('active'));
-    opt.classList.add('active');
+    input.value = opt.textContent;
     container.classList.remove('open');
     validateStep1();
   });
