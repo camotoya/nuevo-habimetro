@@ -497,8 +497,16 @@ function readStep3Fields() {
 function bindToggles() {
   document.querySelectorAll('#propertyType .toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#propertyType .toggle').forEach(b => b.classList.remove('active'));
+      // Deselect all: swap to inactive icon
+      document.querySelectorAll('#propertyType .toggle').forEach(b => {
+        b.classList.remove('active');
+        const img = b.querySelector('img');
+        if (img && b.dataset.img) img.src = b.dataset.img;
+      });
+      // Select clicked: swap to active icon
       btn.classList.add('active');
+      const img = btn.querySelector('img');
+      if (img && btn.dataset.imgSel) img.src = btn.dataset.imgSel;
       formData.propertyType = +btn.dataset.value;
       // Show catastral unit selector for apartments (1, 3), hide for houses (2, 4)
       if (formData.propertyType === 2 || formData.propertyType === 4) {
