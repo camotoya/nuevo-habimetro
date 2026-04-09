@@ -1186,20 +1186,26 @@ input, select, textarea { font-family: inherit; }
     gap: 32px;
   }
   .hero__visual { display: none; }
-  .hero__title { font-size: 30px; }
-  .main { padding: 20px 16px; }
+  .hero__title { font-size: 28px; }
+  .hero__sub { font-size: 15px; }
+  .main { padding: 16px 12px; }
   .main__inner {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
+  .form-col { padding: 20px 16px; }
   .panel-col { position: static; }
-  .results__inner { padding: 20px 16px; }
+  .panel { min-height: auto; padding: 20px 16px; }
+  .results__inner { padding: 16px 12px; }
   .results__grid { grid-template-columns: 1fr; }
   .results__value { font-size: 36px; }
-  .results__meta { gap: 20px; flex-wrap: wrap; }
+  .results__meta { gap: 16px; flex-wrap: wrap; }
+  .results__meta-item { flex: 1; min-width: 80px; }
   .results__map-row { grid-template-columns: 1fr; }
-  .map-container { height: 240px; }
-  .results__cta-btns { flex-direction: column; align-items: center; }
+  .map-container { height: 220px; }
+  .results__cta { padding: 32px 20px; }
+  .results__cta-btns { flex-direction: column; align-items: stretch; }
+  .eligibility { grid-template-columns: 1fr; }
   .footer__inner { flex-direction: column; text-align: center; }
   .explainer__inner { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px; }
   .explainer__img { text-align: center; }
@@ -1208,11 +1214,52 @@ input, select, textarea { font-family: inherit; }
   .faq__title { font-size: 22px; }
 }
 @media (max-width: 600px) {
+  .header__inner { padding: 10px 16px; }
+  .header__logo-img { height: 28px; }
+  .header__tag { display: none; }
+  .hero__inner { padding: 32px 16px; }
+  .hero__title { font-size: 24px; }
+  .hero__stats { gap: 16px; }
+  .hero__stat strong { font-size: 20px; }
+  .hero__stat span { font-size: 11px; }
+
+  /* Property type: 2x2 grid smaller */
+  .toggle-group--grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .toggle--icon { padding: 12px 8px; font-size: 12px; }
+  .toggle--icon img { height: 36px; }
+  .toggle { padding: 10px 8px; font-size: 13px; }
+
+  /* Structured address */
+  .address-structured { flex-wrap: wrap; gap: 6px; }
+  .address-structured__via { flex: 1 1 100%; }
+  .address-structured__num { flex: 1 1 0; min-width: 50px; }
+  .address-structured__num--short { flex: 0.8; }
+  .address-structured__sep { font-size: 16px; }
+
+  /* Steps nav scrollable */
+  .steps-nav { gap: 2px; }
+  .steps-nav__dot { padding: 6px 8px; font-size: 11px; }
+  .steps-nav__dot span { width: 18px; height: 18px; font-size: 10px; }
+
+  /* Fields */
   .fields-grid { grid-template-columns: 1fr; }
   .fields-grid--toggles { grid-template-columns: 1fr 1fr; }
-  .hero__stats { gap: 20px; }
-  .hero__stat strong { font-size: 22px; }
-  .header__inner { padding: 10px 16px; }
-  .header__tag { display: none; }
-  .results__hero { padding: 32px 20px; }
+  .step__title { font-size: 19px; }
+  .step__sub { font-size: 13px; }
+
+  /* Results */
+  .results__hero { padding: 28px 16px; }
+  .results__value { font-size: 30px; }
+  .results__meta { gap: 12px; }
+  .results__meta-value { font-size: 16px; }
+  .results__card { padding: 18px 16px; }
+  .results__card-title { font-size: 15px; }
+
+  /* Eligibility cards */
+  .elig-card { padding: 20px 18px; }
+  .elig-card__title { font-size: 17px; }
+  .elig-card__desc { font-size: 13px; }
+
+  /* Custom select dropdown */
+  .custom-select__dropdown { max-height: 220px; }
 }
