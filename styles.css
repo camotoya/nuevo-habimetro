@@ -612,6 +612,19 @@ input, select, textarea { font-family: inherit; }
   font-weight: 500;
 }
 .panel-card--catastral .poi-chip { background: var(--white); color: var(--gray-700); }
+
+/* Panel POI list */
+.panel-poi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.panel-poi:last-child { border-bottom: none; }
+.panel-poi__icon { font-size: 14px; flex-shrink: 0; }
+.panel-poi__name { flex: 1; font-size: 13px; color: var(--dark); }
+.panel-poi__dist { font-size: 12px; font-weight: 600; color: var(--teal); flex-shrink: 0; }
 .poi-chip__dist { font-weight: 700; }
 .panel-card__detail { font-size: 13px; line-height: 1.7; }
 .panel-card__detail strong { display: block; font-size: 15px; margin-bottom: 4px; }

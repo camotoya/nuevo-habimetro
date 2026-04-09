@@ -310,14 +310,31 @@ function addLocationCard(panel) {
   const title = project ? `${project} — ${addr}` : addr;
 
   panel.insertAdjacentHTML('beforeend', `
-    <div class="panel-card panel-card--location" id="pc-location">
-      <div class="panel-card__badge">📍 Ubicación identificada</div>
-      <div class="panel-card__title">${title}</div>
-      <div class="panel-card__pois" id="pc-location-pois">
-        <span class="poi-chip" style="opacity:0.6">Cargando lugares cercanos...</span>
+    <div class="panel-card panel-card--location" id="pc-location" style="padding:0;overflow:hidden">
+      <div class="panel-card__map" id="panelMap" style="height:200px;width:100%"></div>
+      <div style="padding:16px 20px">
+        <div class="panel-card__badge">📍 Ubicación identificada</div>
+        <div class="panel-card__title" style="margin-bottom:12px">${title}</div>
+        <div id="pc-location-pois" style="font-size:13px;color:#6E6B75">
+          Cargando lugares cercanos...
+        </div>
       </div>
     </div>
   `);
+
+  // Render mini map
+  if (geo.latitude && geo.longitude) {
+    setTimeout(() => {
+      const map = L.map('panelMap', { zoomControl: false, attributionControl: false }).setView([geo.latitude, geo.longitude], 16);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      L.marker([geo.latitude, geo.longitude], {
+        icon: L.divIcon({
+          html: '<div style="background:#7C01FF;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+          iconSize: [14, 14], className: ''
+        })
+      }).addTo(map);
+    }, 100);
+  }
 }
 
 // Called after POIs API resolves to update the location card
@@ -326,16 +343,20 @@ function updateLocationCardPOIs() {
   if (!poisEl) return;
   const pois = api.pois;
   if (pois && Array.isArray(pois) && pois.length > 0) {
-    let chips = '';
+    let html = '';
     pois.forEach(cat => {
       if (cat.result && cat.result.length > 0) {
         const p = cat.result[0];
-        chips += `<span class="poi-chip">${cat.icon || '📍'} ${p.name} <span class="poi-chip__dist">${p.distance}m</span></span>`;
+        html += `<div class="panel-poi">
+          <span class="panel-poi__icon">${cat.icon || '📍'}</span>
+          <span class="panel-poi__name">${p.name}</span>
+          <span class="panel-poi__dist">${p.distance}m</span>
+        </div>`;
       }
     });
-    poisEl.innerHTML = chips;
+    poisEl.innerHTML = html;
   } else {
-    poisEl.innerHTML = '';
+    poisEl.innerHTML = '<span style="color:#949494">Sin lugares de interés cercanos</span>';
   }
 }
 
