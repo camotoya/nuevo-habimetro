@@ -418,15 +418,31 @@ input, select, textarea { font-family: inherit; }
   display: none;
 }
 .field__suggestions.open { display: block; }
-.field__suggestions button {
-  display: block;
+.field__sug-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   width: 100%;
   text-align: left;
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-size: 14px;
   color: var(--dark);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 1px solid var(--gray-100);
 }
-.field__suggestions button:hover { background: var(--purple-light); }
+.field__sug-item:last-child { border-bottom: none; }
+.field__sug-item:hover { background: var(--purple-light); }
+.field__sug-item--match { background: rgba(124,1,255,0.04); }
+.field__sug-item--match:hover { background: var(--purple-light); }
+.field__sug-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.field__sug-status {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--gray-400);
+  text-align: center;
+}
 
 /* ── Custom select (searchable) ── */
 .custom-select { position: relative; }

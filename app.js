@@ -118,20 +118,32 @@ async function loadCities() {
 
 // ── Address Autocomplete ──
 let geoDebounce;
+let addressConfirmed = false;
+
 function bindAddressAutocomplete() {
   const input = document.getElementById('address');
   const sugBox = document.getElementById('addressSuggestions');
+  const matchHelper = document.getElementById('addressMatch');
 
-  input.addEventListener('input', (e) => {
-    formData.address = e.target.value;
+  input.addEventListener('input', () => {
+    formData.address = input.value;
+    addressConfirmed = false;
+    api.georef = null;
+    matchHelper.classList.add('hidden');
     validateStep1();
+
     clearTimeout(geoDebounce);
-    if (e.target.value.length >= 5 && formData.city) {
-      sugBox.innerHTML = '<div style="padding:10px 14px;color:#949494;font-size:13px">Buscando...</div>';
-      sugBox.classList.add('open');
-      geoDebounce = setTimeout(() => searchAddress(e.target.value), 250);
+    if (input.value.length >= 8 && formData.city) {
+      geoDebounce = setTimeout(() => searchAddress(input.value), 300);
     } else {
       sugBox.classList.remove('open');
+    }
+  });
+
+  input.addEventListener('focus', () => {
+    // Re-show suggestions if there's text and no confirmed address
+    if (input.value.length >= 8 && formData.city && !addressConfirmed) {
+      searchAddress(input.value);
     }
   });
 
@@ -143,60 +155,92 @@ function bindAddressAutocomplete() {
 
 async function searchAddress(query) {
   const sugBox = document.getElementById('addressSuggestions');
+
+  // Show searching state
+  sugBox.innerHTML = '<div class="field__sug-status">Buscando dirección...</div>';
+  sugBox.classList.add('open');
+
   try {
     const raw = await HabiAPI.getGeoref(query, formData.city, formData.propertyType);
     const georef = raw.georeferencing || raw;
-    api.georef = georef;
 
     let html = '';
-    // Main result
-    if (georef.lot_id || georef.address) {
-      const label = georef.project ? `${georef.address} — ${georef.project}` : georef.address;
-      html += `<button data-address="${georef.address || query}" data-main="true">${label}</button>`;
+
+    // Main result (exact match with lot_id)
+    if (georef.lot_id && georef.address) {
+      const project = georef.project ? ` — ${georef.project}` : '';
+      html += `<button class="field__sug-item field__sug-item--match" data-address="${georef.address}" data-main="true">
+        <span class="field__sug-icon">📍</span>
+        <span><strong>${georef.address}</strong>${project}</span>
+      </button>`;
     }
+
     // Suggestions
     if (georef.suggested_addresses && georef.suggested_addresses.length > 0) {
       georef.suggested_addresses.forEach(s => {
-        html += `<button data-address="${s.direccion}">${s.direccion} — ${s.label || s.ciudad || ''}</button>`;
+        html += `<button class="field__sug-item" data-address="${s.direccion}">
+          <span class="field__sug-icon">📍</span>
+          <span>${s.direccion} <span style="color:#949494">— ${s.label || s.ciudad || ''}</span></span>
+        </button>`;
       });
     }
 
     if (html) {
       sugBox.innerHTML = html;
       sugBox.classList.add('open');
-      sugBox.querySelectorAll('button').forEach(btn => {
+
+      // Store georef if we got a direct match
+      if (georef.lot_id) api.georef = georef;
+
+      // Bind selection
+      sugBox.querySelectorAll('.field__sug-item').forEach(btn => {
         btn.addEventListener('mousedown', (e) => {
-          e.preventDefault(); // Prevent input blur from closing suggestions
-          selectSuggestion(btn);
+          e.preventDefault();
+          selectSuggestion(btn, georef);
         });
       });
     } else {
-      sugBox.innerHTML = '<div style="padding:10px 14px;color:#949494;font-size:13px">No se encontraron resultados</div>';
+      sugBox.innerHTML = '<div class="field__sug-status">Al parecer no encontramos esta dirección 🧐</div>';
     }
   } catch (e) {
     console.error('Georef search failed:', e);
-    sugBox.classList.remove('open');
+    sugBox.innerHTML = '<div class="field__sug-status">Error al buscar dirección</div>';
   }
 }
 
-async function selectSuggestion(btn) {
+async function selectSuggestion(btn, originalGeoref) {
   const address = btn.dataset.address;
-  document.getElementById('address').value = address;
-  formData.address = address;
-  document.getElementById('addressSuggestions').classList.remove('open');
+  const input = document.getElementById('address');
+  const sugBox = document.getElementById('addressSuggestions');
+  const matchHelper = document.getElementById('addressMatch');
 
-  // If this was the main result and we already have georef, great
-  if (btn.dataset.main === 'true' && api.georef && api.georef.lot_id) {
+  input.value = address;
+  formData.address = address;
+  sugBox.classList.remove('open');
+
+  // If it was the main match, use that georef directly
+  if (btn.dataset.main === 'true' && originalGeoref && originalGeoref.lot_id) {
+    api.georef = originalGeoref;
+    addressConfirmed = true;
+    const project = originalGeoref.project || '';
+    matchHelper.textContent = project ? `✓ ${project} — Dirección identificada` : '✓ Dirección identificada';
+    matchHelper.classList.remove('hidden');
     validateStep1();
     return;
   }
 
-  // Otherwise re-fetch for this specific address
+  // Otherwise re-fetch for the selected address
+  matchHelper.textContent = 'Verificando dirección...';
+  matchHelper.classList.remove('hidden');
   try {
     const raw = await HabiAPI.getGeoref(address, formData.city, formData.propertyType);
     api.georef = raw.georeferencing || raw;
+    addressConfirmed = true;
+    const project = api.georef.project || '';
+    matchHelper.textContent = project ? `✓ ${project} — Dirección identificada` : '✓ Dirección identificada';
   } catch (e) {
     console.error('Georef select failed:', e);
+    matchHelper.textContent = 'No pudimos verificar esta dirección';
   }
   validateStep1();
 }

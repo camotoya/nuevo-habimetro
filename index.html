@@ -107,9 +107,10 @@
                 </div>
               </div>
               <div class="field">
-                <label class="field__label" for="address">Dirección</label>
-                <input class="field__input" type="text" id="address" placeholder="Ej: Carrera 10 #73-20" required>
+                <label class="field__label" for="address">Ingresa tu dirección</label>
+                <input class="field__input" type="text" id="address" placeholder="Ej: Calle 57b Sur #40-34" autocomplete="off" required>
                 <div class="field__suggestions" id="addressSuggestions"></div>
+                <p class="field__helper hidden" id="addressMatch"></p>
               </div>
             </div>
             <button class="btn btn--primary btn--full btn--next" id="btn1" disabled>Continuar</button>
